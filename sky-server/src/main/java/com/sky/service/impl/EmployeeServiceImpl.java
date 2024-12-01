@@ -26,6 +26,7 @@ import org.springframework.util.DigestUtils;
 import java.time.LocalDateTime;
 
 
+@SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -76,11 +77,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDTO,employee);
         employee.setStatus(StatusConstant.ENABLE);
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.addEmployee(employee);
     }
@@ -99,6 +95,18 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(id)
                 .status(status)
                 .build();
+        employeeMapper.update(employee);
+    }
+
+    @Override
+    public Employee getById(long id) {
+       return employeeMapper.getById(id);
+    }
+
+    @Override
+    public void updateEmployee(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
         employeeMapper.update(employee);
     }
 

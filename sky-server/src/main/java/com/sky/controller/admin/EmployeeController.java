@@ -83,7 +83,22 @@ public class EmployeeController {
 
     @PostMapping("/status/{status}")
     public Result startOrStop(@PathVariable Integer status,@RequestParam long id){
+        log.info("启用或禁用用户{}",id);
         employeeService.startOrStop(status,id);
+        return Result.success();
+    }
+    @GetMapping("/{id}")
+    public Result<Employee> getById(@PathVariable long id) {
+        log.info("查询用户{}",id);
+        Employee byId = employeeService.getById(id);
+        return Result.success(byId);
+    }
+
+    @PutMapping
+    public Result updateEmployee(@RequestBody EmployeeDTO employeeDTO){
+        log.info("修改员工{}信息",employeeDTO);
+        employeeService.updateEmployee(employeeDTO);
+
         return Result.success();
     }
 }
