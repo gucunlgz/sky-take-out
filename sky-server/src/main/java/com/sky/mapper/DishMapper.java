@@ -31,4 +31,8 @@ public interface DishMapper {
 
     @AutoFill(value = OperationType.INSERT)
     void insert(Dish dish);
+
+    Integer countByCategoryId(Long id);
+
+    List<Dish> getStatusBySetmealId(Long id);
 }

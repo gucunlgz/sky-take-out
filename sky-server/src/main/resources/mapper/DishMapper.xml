@@ -74,4 +74,15 @@
         where dish.id=#{id} and dish.category_id=category.id
 
     </select>
+    <select id="countByCategoryId" resultType="java.lang.Integer">
+        select count(*) from sky_take_out.dish where category_id=#{id}
+    </select>
+    <select id="getStatusBySetmealId" resultType="com.sky.entity.Dish">
+        SELECT dish.*
+        FROM sky_take_out.dish
+        INNER JOIN sky_take_out.setmeal_dish ON dish.id = setmeal_dish.dish_id
+        INNER JOIN sky_take_out.setmeal ON setmeal_dish.setmeal_id = setmeal.id
+        where setmeal.id=#{id}
+
+    </select>
 </mapper>
