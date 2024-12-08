@@ -21,6 +21,7 @@ public interface DishMapper {
     @Select("select * from sky_take_out.dish where category_id=#{categoryId}")
     List<Dish> searchByCategoryId(Long categoryId);
 
+    List<DishVO> selectByCategoryId(Dish dish);
 
     DishVO searchById(Long id);
 
@@ -35,4 +36,9 @@ public interface DishMapper {
     Integer countByCategoryId(Long id);
 
     List<Dish> getStatusBySetmealId(Long id);
+
+    @Select("select sky_take_out.dish.category_id from sky_take_out.dish where id=#{id}")
+    Long getCategoryIdById(Long id);
+
+    Long getCategoryIdBySetmealId(Long categoryId);
 }

@@ -16,9 +16,12 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +48,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "setmealCache",key = "#setmealDTO.categoryId")//cache缓存处理
     public void addSetmeal(SetmealDTO setmealDTO) {
         Setmeal setmeal = new Setmeal();
         BeanUtils.copyProperties(setmealDTO,setmeal);
@@ -71,6 +75,7 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "setmealCache",allEntries = true)
     public void startOrStopSetmeal(Integer status, Long id) {
         //检查当前套餐中是否有停售的菜品
         if(Objects.equals(status,StatusConstant.ENABLE)){
@@ -91,7 +96,9 @@ public class SetmealServiceImpl implements SetmealService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "setmealCache",allEntries = true)
     public void update(SetmealDTO setmealDTO) {
+
         //修改套餐数据
         Setmeal setmeal=new Setmeal();
         BeanUtils.copyProperties(setmealDTO,setmeal);
@@ -122,5 +129,18 @@ public class SetmealServiceImpl implements SetmealService {
             setmealDishMapper.deleteBySetmealId(id);
             setmealMapper.deleteById(id);
         });
+    }
+
+    @Override
+    @Cacheable(cacheNames = "setmealCache",key="#setmeal.categoryId")
+    public List<Setmeal> searchSetmealBycategoryId(Setmeal setmeal) {
+
+     return setmealMapper.searchSetmealBycategoryId(setmeal);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "dishItem",key = "#id")
+    public List<DishItemVO> searchDishItemBySetmealId(Long id) {
+        return setmealMapper.searchDishItemBySetmealId(id);
     }
 }

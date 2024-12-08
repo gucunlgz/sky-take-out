@@ -85,4 +85,17 @@
         where setmeal.id=#{id}
 
     </select>
+    <select id="selectByCategoryId" resultType="com.sky.vo.DishVO">
+        select sky_take_out.dish.*,sky_take_out.category.name as categoryName from
+        sky_take_out.dish inner join sky_take_out.category on dish.category_id = category.id
+        <where>
+            <if test="categoryId!=null">
+                dish.category_id=#{categoryId}
+            </if>
+            <if test="status!=null">
+                and dish.status=#{status}
+            </if>
+        </where>
+    </select>
+
 </mapper>

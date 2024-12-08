@@ -24,4 +24,6 @@ public interface DishService {
     void addDish(DishDTO dishDTO);
 
     void updateDish(DishDTO dishDTO);
+
+    List<DishVO> getDishVOBycategoryId(Dish dish);
 }

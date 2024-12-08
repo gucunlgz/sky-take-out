@@ -9,6 +9,7 @@ import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -30,4 +31,7 @@ public interface CategoryMapper {
 
     @Delete("delete from sky_take_out.category where id=#{id}")
     void delete(Long id);
+
+    @Select("select sky_take_out.category.status from sky_take_out.category where id=#{id}")
+    Integer getStatusById(Long id);
 }

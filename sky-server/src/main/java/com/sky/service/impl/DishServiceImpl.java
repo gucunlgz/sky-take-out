@@ -17,6 +17,7 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,10 @@ public class DishServiceImpl implements DishService {
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
+
     @Override
     public PageResult pageSearch(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(),dishPageQueryDTO.getPageSize());
@@ -53,7 +58,10 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void startOrStop(Integer status, Long id) {
+        Long categoryId=dishMapper.getCategoryIdById(id);
+        redisTemplate.delete("dish_"+categoryId);
         Dish dish = Dish.builder()
                 .id(id)
                 .status(status)
@@ -62,7 +70,7 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void delete(ArrayList<Long> ids) {
         //判断当前菜品是否在售
         for(Long id:ids){
@@ -89,6 +97,9 @@ public class DishServiceImpl implements DishService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addDish(DishDTO dishDTO) {
+        //清除redis缓存
+        redisTemplate.delete("dish_"+dishDTO.getCategoryId());
+
         //保存菜品数据
         Dish dish=new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
@@ -109,6 +120,12 @@ public class DishServiceImpl implements DishService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateDish(DishDTO dishDTO) {
+        Long categoryId = dishMapper.getCategoryIdById(dishDTO.getId());
+
+        //清除redis缓存
+        redisTemplate.delete("dish_"+categoryId);
+        redisTemplate.delete("dish_"+dishDTO.getCategoryId());
+
         //修改菜品
         Dish dish=new Dish();
         BeanUtils.copyProperties(dishDTO,dish);
@@ -127,6 +144,28 @@ public class DishServiceImpl implements DishService {
 
             dishFlavorMapper.insertFlavors(flavors);
         }
+    }
+
+
+    //用户端根据categoryId(分类id)查询菜品，redis
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<DishVO> getDishVOBycategoryId(Dish dish) {
+        //redis查询
+        String key="dish_"+dish.getCategoryId();
+        List<DishVO> dishVOS = (List<DishVO>) redisTemplate.opsForValue().get(key);
+        if(dishVOS!=null&&!dishVOS.isEmpty()){
+            return dishVOS;
+        }
+
+        dishVOS = dishMapper.selectByCategoryId(dish);
+
+        for(DishVO d:dishVOS){
+            List<DishFlavor> dishFlavors = dishFlavorMapper.getDishFlavorsByDishId(d.getId());
+            d.setFlavors(dishFlavors);
+        }
+        redisTemplate.opsForValue().set(key,dishVOS);
+        return dishVOS;
     }
 
 }

@@ -66,4 +66,17 @@
         from sky_take_out.setmeal left outer join sky_take_out.category on setmeal.category_id = category.id
         where setmeal.id=#{id}
     </select>
+    <select id="searchSetmealBycategoryId" resultType="com.sky.entity.Setmeal">
+        select * from sky_take_out.setmeal
+        <where>
+            <if test="name != null"> and name like concat('%',#{name},'%') </if>
+            <if test="categoryId != null"> and category_id = #{categoryId} </if>
+            <if test="status != null"> and status = #{status} </if>
+        </where>
+    </select>
+    <select id="searchDishItemBySetmealId" resultType="com.sky.vo.DishItemVO">
+    select sky_take_out.setmeal_dish.name,sky_take_out.setmeal_dish.copies,sky_take_out.dish.description,sky_take_out.dish.image
+    from sky_take_out.setmeal_dish inner join sky_take_out.dish on setmeal_dish.dish_id = dish.id
+    where setmeal_id=#{id}
+    </select>
 </mapper>
