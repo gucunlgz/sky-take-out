@@ -1,17 +1,22 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -155,6 +162,97 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
+    /**
+     * 查询用户历史订单信息
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PageResult historyOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        List<OrderVO> orderVOS=new ArrayList<>();
+        PageHelper.startPage(ordersPageQueryDTO.getPage(),ordersPageQueryDTO.getPageSize());
+        Page<Orders> page=orderMapper.pageSearchHistoryOrders(ordersPageQueryDTO);
+        if(page!=null&&page.getTotal()>0){
+            for (Orders orders:page){
+                OrderVO orderVO=new OrderVO();
+                BeanUtils.copyProperties(orders,orderVO);
+                List<OrderDetail> orderDetails=orderDetailMapper.getByOrderId(orders.getId());
+                orderVO.setOrderDetailList(orderDetails);
+                orderVOS.add(orderVO);
+            }
+        }
+        return new PageResult(page != null ? page.getTotal() : 0,orderVOS);
+
+
+    }
+
+    /**
+     * 根据id查询订单信息
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderVO getOrderById(Long id) {
+       Orders orders= orderMapper.getById(id);
+       List<OrderDetail> orderDetail=orderDetailMapper.getByOrderId(id);
+       OrderVO orderVO=new OrderVO();
+       BeanUtils.copyProperties(orders,orderVO);
+       orderVO.setOrderDetailList(orderDetail);
+       return orderVO;
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     */
+    @Override
+    public void cancelOrder(Long id) {
+        Orders orders= orderMapper.getById(id);
+        if(orders==null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if(orders.getPayStatus()>2){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        Orders ordersDB=Orders.builder()
+                .id(id)
+                .cancelTime(LocalDateTime.now())
+                .cancelReason("用户取消订单")
+                .status(Orders.CANCELLED)
+                .build();
+        orderMapper.update(ordersDB);
+
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void repetition(Long id) {
+        Orders orders= orderMapper.getById(id);
+        if(orders==null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+
+        }
+        List<OrderDetail> orderDetail=orderDetailMapper.getByOrderId(id);
+        if(orderDetail==null|| orderDetail.isEmpty()){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        List<ShoppingCart> shoppingCarts = orderDetail.stream().map(order -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(order, shoppingCart, "id");
+            shoppingCart.setUserId(BaseContext.getCurrentId());
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).toList();
+        shoppingCartMapper.insertBatch(shoppingCarts);
+
+    }
 
 
 }

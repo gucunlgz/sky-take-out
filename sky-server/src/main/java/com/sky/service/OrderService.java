@@ -1,9 +1,12 @@
 package com.sky.service;
 
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 
 public interface OrderService {
     /**
@@ -27,4 +30,29 @@ public interface OrderService {
      */
     void paySuccess(String outTradeNo);
 
+    /**
+     * 查询用户历史订单信息
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult historyOrders(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 根据id查询订单详情
+     * @param id
+     * @return
+     */
+    OrderVO getOrderById(Long id);
+
+    /**
+     * 取消订单
+     * @param id
+     */
+    void cancelOrder(Long id);
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    void repetition(Long id);
 }

@@ -27,6 +27,18 @@
         </set>
         where id = #{id}
     </update>
+    <select id="pageSearchHistoryOrders" resultType="com.sky.entity.Orders">
+        select * from sky_take_out.orders
+        <where>
+            <if test="userId!=null">user_id=#{userId}</if>
+            <if test="status!=null">and status=#{status}</if>
+            <if test="number!=null">and number=#{number}</if>
+        </where>
+    </select>
+    <select id="getById" resultType="com.sky.entity.Orders">
+        select * from sky_take_out.orders
+        where id=#{id}
+    </select>
 
 
 </mapper>
