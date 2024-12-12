@@ -35,4 +35,11 @@ public interface OrderMapper {
     Page<Orders> pageSearchHistoryOrders(OrdersPageQueryDTO ordersPageQueryDTO);
 
     Orders getById(Long id);
+
+    /**
+     * 统计某种状态订单数量
+     * @param status
+     * @return
+     */
+    Integer countStatus(Integer status);
 }

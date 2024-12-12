@@ -48,7 +48,6 @@ public class HttpClientUtil {
                 }
             }
             URI uri = builder.build();
-
             //创建GET请求
             HttpGet httpGet = new HttpGet(uri);
             //发送请求
