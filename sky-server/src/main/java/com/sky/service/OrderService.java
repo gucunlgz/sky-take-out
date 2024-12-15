@@ -1,11 +1,15 @@
 package com.sky.service;
 
 import com.sky.dto.*;
+import com.sky.entity.Orders;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface OrderService {
     /**
@@ -105,4 +109,9 @@ public interface OrderService {
      */
     void completeOrder(Long id);
 
+    /**
+     * 催单
+     * @param id
+     */
+    void remind(Long id);
 }

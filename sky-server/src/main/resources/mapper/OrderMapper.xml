@@ -46,6 +46,18 @@
         select count(*) from sky_take_out.orders
         where status=#{status}
     </select>
+    <select id="getTimeoutOrders" resultType="com.sky.entity.Orders">
+        select * from sky_take_out.orders
+        where status=#{status} and order_time &lt;#{time}
+    </select>
+    <select id="getOrdersByStatus" resultType="com.sky.entity.Orders">
+        select * from sky_take_out.orders
+        where status=#{status}
+    </select>
+    <select id="getOrdersByStatusAndTime" resultType="com.sky.entity.Orders">
+        select * from sky_take_out.orders
+        where status=#{status} and order_time &lt;#{time}
+    </select>
 
 
 </mapper>
