@@ -41,4 +41,11 @@ public interface SetmealMapper {
 
     @Select("select sky_take_out.setmeal.category_id from sky_take_out.setmeal where id=#{id}")
     Long getCategoryIdById(Long id);
+
+    /**
+     * 根据订单状态查询订单数量
+     * @param status
+     * @return
+     */
+    Integer countByStatus(Integer status);
 }

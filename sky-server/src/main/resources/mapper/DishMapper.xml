@@ -97,5 +97,9 @@
             </if>
         </where>
     </select>
+    <select id="countByStatus" resultType="java.lang.Integer">
+        select count(*) from sky_take_out.dish
+        where status=#{status}
+    </select>
 
 </mapper>

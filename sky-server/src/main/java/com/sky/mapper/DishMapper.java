@@ -41,4 +41,5 @@ public interface DishMapper {
     Long getCategoryIdById(Long id);
 
 
+    Integer countByStatus(Integer status);
 }

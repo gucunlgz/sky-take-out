@@ -79,4 +79,12 @@
     from sky_take_out.setmeal_dish inner join sky_take_out.dish on setmeal_dish.dish_id = dish.id
     where setmeal_id=#{id}
     </select>
+    <select id="countByStatus" resultType="java.lang.Integer">
+        select count(*) from sky_take_out.setmeal
+        <where>
+            <if test="status!=null">
+                status=#{status}
+            </if>
+        </where>
+    </select>
 </mapper>

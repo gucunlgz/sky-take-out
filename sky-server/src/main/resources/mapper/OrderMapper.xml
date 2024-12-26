@@ -44,7 +44,11 @@
     </select>
     <select id="countStatus" resultType="java.lang.Integer">
         select count(*) from sky_take_out.orders
-        where status=#{status}
+        <where>
+            <if test="status!=null">
+                status=#{status}
+            </if>
+        </where>
     </select>
     <select id="getTimeoutOrders" resultType="com.sky.entity.Orders">
         select * from sky_take_out.orders
@@ -57,6 +61,34 @@
     <select id="getOrdersByStatusAndTime" resultType="com.sky.entity.Orders">
         select * from sky_take_out.orders
         where status=#{status} and order_time &lt;#{time}
+    </select>
+    <select id="sumByMap" resultType="java.lang.Double">
+        select sum(sky_take_out.orders.amount) from sky_take_out.orders
+       <where>
+           <if test="begin!=null">order_time &gt; #{begin}</if>
+           <if test="end!=null">and order_time &lt; #{end} </if>
+           <if test="status!=null">and status=#{status}</if>
+       </where>
+    </select>
+    <select id="getOrdersSumByStatusAndTime" resultType="java.lang.Integer">
+        select count(*) from sky_take_out.orders
+        <where>
+            <if test="begin!=null">order_time &gt; #{begin}</if>
+            <if test="end!=null">and order_time &lt; #{end} </if>
+            <if test="status!=null">and status=#{status}</if>
+        </where>
+    </select>
+    <select id="getOrdersTop10ByTime" resultType="com.sky.dto.GoodsSalesDTO">
+        select sky_take_out.order_detail.name,SUM(sky_take_out.order_detail.number) as number
+        from sky_take_out.order_detail inner join sky_take_out.orders on order_detail.order_id = orders.id
+        <where>
+            <if test="begin!=null">orders.order_time &gt; #{begin}</if>
+            <if test="end!=null">and orders.order_time &lt; #{end} </if>
+            <if test="status!=null">and orders.status=#{status}</if>
+        </where>
+        group by sky_take_out.order_detail.name
+        order by number desc
+        limit 0,10
     </select>
 
 
